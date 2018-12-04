@@ -4,6 +4,7 @@ from enum import Enum
 from sympy import *
 from sympy.parsing.sympy_parser import parse_expr
 from sympy.parsing.sympy_parser import standard_transformations, implicit_multiplication_application
+from sympy.plotting import plot3d
 from io import BytesIO
 import base64
 
@@ -17,37 +18,54 @@ class Action(Enum):
     FACTORIZE = 3
     AREA = 4
     PLOT = 5
+    THREED = 6
 
-possible_actions = {'integrate': Action.INTEGRATE, 'differentiate': Action.DIFFERENTIATE, 'factorize': Action.FACTORIZE, 'area': Action.AREA, 'plot': Action.PLOT}
+possible_actions = {'integrate': Action.INTEGRATE, 'differentiate': Action.DIFFERENTIATE, 'factorize': Action.FACTORIZE, 'area': Action.AREA, 'plot': Action.PLOT, '3d': Action.THREED, '3D': Action.THREED, 'derivate': Action.DIFFERENTIATE, 'integral': Action.INTEGRATE}
 
-@app.route('/api/v1.0/<string:command>', methods=['GET'])
+word_set = set(words.words())
+to_remove = ['x','y','z']
+to_add = ['3D', '3d']
+
+for i in to_remove:
+    word_set.remove(i)
+
+for i in to_add:
+    word_set.add(i)
+
+@app.route('/api/v1.0/<path:command>', methods=['GET'])
 def index(command):
-    word_set = set(words.words())
+    print("recieved " + command)
     tokenized_equation = command.split(" ")
     expression = ""
     for i in tokenized_equation:
         if i not in word_set:
             expression += i
+    print("expression is " + expression)
 
     s = parse_expr(expression)
 
-    todo = Action.INTEGRATE
+    todo = [Action.PLOT]
     for i in tokenized_equation:
+        print("scanning " + i)
         if i in possible_actions:
-            todo = possible_actions[i]
-            break
+            print("yes " + i)
+            todo.append(possible_actions[i])
 
     response = ""
     image = ""
     x = symbols('x')
     y = symbols('y')
     z = symbols('z')
-    if todo == Action.INTEGRATE:
+    if Action.INTEGRATE in todo:
         response = latex(integrate(s, x))
-    if todo == Action.DIFFERENTIATE:
+    if Action.DIFFERENTIATE in todo:
         response = latex(diff(s,x))
-    if todo == Action.PLOT:
-        graph = plot(s, show=False)
+    if Action.PLOT in todo:
+        if Action.THREED in todo:
+            print("doing 3d")
+            graph = plot3d(s, show=False)
+        else:
+            graph = plot(s, show=False)
         ramfile = BytesIO()
         graph.save(ramfile)
         ramfile.seek(0)
