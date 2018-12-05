@@ -62,7 +62,7 @@ def index(command):
 
     s = parse_expr(expression)
 
-    todo = [Action.PLOT]
+    todo = []
     for i in tokenized_equation:
         print("scanning " + i)
         if i in possible_actions:
