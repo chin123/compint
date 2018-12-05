@@ -41,16 +41,18 @@ for i in to_add:
 @app.route('/api/v1.0/<path:command>', methods=['GET'])
 def index(command):
     print("recieved " + command)
-    pattern = "(\d|([A-Z]|[a-z]))[a-z]"
+    #pattern = "(\d|([A-Z]|[a-z]))[a-z]"
+    pattern = "(\d|([A-Z]|[a-z]))[a-z][\ \+\-\/\*\^]"
     tokenized_equation = command.split(" ")
     expression = ""
     for i in tokenized_equation:
         if i not in word_set:
             expression += i
+    expression += " "
     print("expression is " + expression)
     mult_loc = []
     for match in finditer(pattern, expression):
-        mult_loc.append(match.span()[1] - 1)
+        mult_loc.append(match.span()[1] - 2)
 
     offset = 0
     for i in mult_loc:
