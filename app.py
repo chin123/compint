@@ -25,8 +25,10 @@ class Action(Enum):
     THREED = 6
     SOLVE = 7
     SIMPLIFY = 8
+    DOUBLE = 9
+    TRIPLE = 10
 
-possible_actions = {'integrate': Action.INTEGRATE, 'differentiate': Action.DIFFERENTIATE, 'factorize': Action.FACTORIZE, 'factor': Action.FACTORIZE, 'factors': Action.FACTORIZE, 'area': Action.AREA, 'plot': Action.PLOT, '3d': Action.THREED, '3D': Action.THREED, 'derivate': Action.DIFFERENTIATE, 'integral': Action.INTEGRATE, 'solve': Action.SOLVE, 'root': Action.SOLVE, 'roots': Action.SOLVE, 'simplify': Action.SIMPLIFY}
+possible_actions = {'integrate': Action.INTEGRATE, 'differentiate': Action.DIFFERENTIATE, 'derivative': Action.DIFFERENTIATE, 'derivate': Action.DIFFERENTIATE, 'factorize': Action.FACTORIZE, 'factor': Action.FACTORIZE, 'factors': Action.FACTORIZE, 'area': Action.AREA, 'plot': Action.PLOT, '3d': Action.THREED, '3D': Action.THREED, 'derivate': Action.DIFFERENTIATE, 'integral': Action.INTEGRATE, 'solve': Action.SOLVE, 'root': Action.SOLVE, 'roots': Action.SOLVE, 'simplify': Action.SIMPLIFY, 'double': Action.DOUBLE, 'triple':Action.TRIPLE}
 
 word_set = set(words.words())
 to_remove = ['x','y','z']
@@ -77,7 +79,12 @@ def index(command):
     y = symbols('y')
     z = symbols('z')
     if Action.INTEGRATE in todo:
-        response = latex(integrate(s, x))
+        if Action.DOUBLE in todo: # quick hack for double and triple, will generalise to n integrals later
+            response = latex(integrate(integrate(s,x),y))
+        elif Action.TRIPLE in todo:
+            response = latex(integrate(integrate(integrate(s,x),y),z))
+        else:
+            response = latex(integrate(s, x))
     if Action.DIFFERENTIATE in todo:
         response = latex(diff(s,x))
     if Action.PLOT in todo:
